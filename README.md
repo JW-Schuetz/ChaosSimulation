@@ -19,9 +19,10 @@ Some display modes of the ODE-solution are available:
 * mouse button 2: successive selecting display modes A to D
 * mouse wheel: select zoom-value (range 0.1 to 5.0)
 * keybord key FORWARD: change rotation direction to forward
-* keybord key BACKWARD: change rotation direction to backward
+* keybord key BACKWARD: change rotation direction to backward![LorenzAttractor]
 * keyboard keys UP/DOWN: stop rotation
 
 ## Screenshot display mode D:
 
-![Screenshot 2023-08-07 121657](https://github.com/JW-Schuetz/Simulation/assets/40438317/f58685de-e4ce-4514-a50b-ed1d152ebefb)
+(https://github.com/JW-Schuetz/ChaosSimulation/assets/40438317/9f4fbeea-f253-48cc-bd78-32cc11d61e06)
+
