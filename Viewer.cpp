@@ -6,8 +6,6 @@
 #include "Common.h"
 #include "Viewer.h"
 #include "ShaderSources.h"
-#include "Lorenz.h"
-#include "Roessler.h"
 
 
 #define LOGBUFFSIZE 512
@@ -15,6 +13,7 @@
 
 using namespace std;
 
+Calculator *Viewer::calculator;
 Camera *Viewer::camera;
 GLsizei Viewer::edge;
 GLsizei Viewer::viewPortWidth;
@@ -43,6 +42,8 @@ double Viewer::maxCube;
 Viewer::Viewer( string logFile )
 {
 	logger = ofstream { logFile, ios_base::app };
+
+	calculator = new Calculator();
 
 	windowWidth  = 2000;
 	windowHeight = 2000;
@@ -449,6 +450,9 @@ void Viewer::renderLoop( int &index, size_t buffSize, char *buff, float &time,
 	if( abs( xODE[1] ) > maxCube ) { maxCube = abs( xODE[1] ); cubeChanged = true; }
 	if( abs( xODE[2] ) > maxCube ) { maxCube = abs( xODE[2] ); cubeChanged = true; }
 
+	bool changed {};
+	maxCube = calculator->calcMaxCube( changed );
+
 	if( newInitialValue && ( index < traceLength - cursorRedrawTraceCount ) )
 	{
 		double mouseViewPortX, mouseViewPortY, mouseRawX, mouseRawY;	// local variables
@@ -476,6 +480,7 @@ void Viewer::renderLoop( int &index, size_t buffSize, char *buff, float &time,
 
 	// solve ODE system -> calc next solution point
 	handleSystemMode( index, systemModus, lor, roe );
+	xODE = calculator->step();
 
 	// tidy up
 	glBindBuffer( GL_ARRAY_BUFFER, 0 );
@@ -499,6 +504,8 @@ void Viewer::handleMouseEvents( int &index, bool &newInitialValue, Double2d &ini
 				xODE[0] = mousePhysX;			// set new initial (x,y)-values for ODE-solution
 				xODE[1] = mousePhysY;
 				xODE[2] = 0.0f;
+
+				calculator->setInitValues( xODE );
 
 				clearTraceDisplay();
 
@@ -565,26 +572,29 @@ void Viewer::handleSystemMode( int &index, SYSTEM_MODE systemModus, Lorenz *lor,
 			if( systemModusChanged )
 			{
 				systemModusChanged = {};
-				maxCube            = -FLT_MAX;		// reset display scaling
-				xODE               = lor->getInitState();
+				//maxCube            = -FLT_MAX;		// reset display scaling
+				//xODE               = lor->getInitState();
+
+				calculator->changeMode( LORENZ );
 
 				clearTraceDisplay();
 				index = traceLength;	// not "index = traceLength - 1" because of following line "--index;"
-
 			}
-			stepper.do_step( *lor, xODE, 0.0, lor->getDeltaT() );
+			//stepper.do_step( *lor, xODE, 0.0, lor->getDeltaT() );
 			break;
 		case ROESSLER:
 			if( systemModusChanged )
 			{
 				systemModusChanged = {};
-				maxCube            = -FLT_MAX;		// reset display scaling
-				xODE               = roe->getInitState();
+				//maxCube            = -FLT_MAX;		// reset display scaling
+				//xODE               = roe->getInitState();
+
+				calculator->changeMode( ROESSLER );
 
 				clearTraceDisplay();
 				index = traceLength;	// not "index = traceLength - 1" because of following line "--index;"
 			}
-			stepper.do_step( *roe, xODE, 0.0, roe->getDeltaT() );
+			//stepper.do_step( *roe, xODE, 0.0, roe->getDeltaT() );
 			break;
 	}
 }
@@ -755,6 +765,8 @@ Viewer::~Viewer()
 	glfwTerminate();
 
 	logger.flush();
+
+	delete calculator;
 }
 
 void Viewer::setViewport()
@@ -829,11 +841,15 @@ void Viewer::processInput( SYSTEM_MODE &systemModus )
 	{
 		systemModus        = LORENZ;
 		systemModusChanged = true;
+
+		calculator->changeMode( LORENZ );
 	}
 	if( glfwGetKey( window, GLFW_KEY_R ) == GLFW_PRESS )		// solve Roessler system
 	{
 		systemModus        = ROESSLER;
 		systemModusChanged = true;
+
+		calculator->changeMode( ROESSLER );
 	}
 }
 

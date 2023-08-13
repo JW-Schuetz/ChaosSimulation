@@ -14,8 +14,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Boost.h"
-#include "Lorenz.h"
-#include "Roessler.h"
+#include "Calculator.h"
 
 
 using namespace std;
@@ -60,12 +59,6 @@ typedef enum
 
 typedef enum
 {
-	LORENZ = 0,
-	ROESSLER,
-} SYSTEM_MODE;
-
-typedef enum
-{
 	ATTRIB0 = 0,
 	ATTRIB1 = 1,
 } ATTRIB;
@@ -80,6 +73,8 @@ static const double maxScale		       = 5.0f;		// max. allowed scale factor
 
 class Viewer
 {
+	static Calculator *calculator;					// ODE solver
+
 	static GLfloat scale;							// scale factor
 	static Camera *camera;
 	static VIEW_MODE viewModus;

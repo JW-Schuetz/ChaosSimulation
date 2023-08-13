@@ -2,7 +2,7 @@
 #include "Simulation.h"
 
 
-Simulation::Simulation( string s ): Viewer( s ), Calculator()
+Simulation::Simulation( string s ): Viewer( s )
 {
 
 }

@@ -2,10 +2,9 @@
 
 #include <string>
 #include "Viewer.h"
-#include "Calculator.h"
 
 
-class Simulation: public Viewer, public Calculator
+class Simulation: public Viewer
 {
 public:
 	Simulation( string );
