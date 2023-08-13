@@ -1,0 +1,6 @@
+.vs
+x64
+/Simulation.log
+*.lyx~
+/\#Simulation.lyx\#
+*.bak
