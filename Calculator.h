@@ -17,6 +17,7 @@ class Calculator
 
 public:
 	Calculator();
+	~Calculator();
 
 	ode_state step( bool & );
 	void setMode( SYSTEM_MODE, bool & );

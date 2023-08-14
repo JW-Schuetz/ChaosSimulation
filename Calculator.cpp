@@ -27,6 +27,12 @@ Calculator::Calculator()
 	calcMaxCube( cubeChanged );		// recalculate maxCube
 }
 
+Calculator::~Calculator()
+{
+	delete roessler;
+	delete lorenz;
+}
+
 void Calculator::setMode( SYSTEM_MODE mode, bool &cubeChanged )
 {
 	this->mode = mode;		// change mode

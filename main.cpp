@@ -1,4 +1,12 @@
 
+//#define WITH_MEM_LEAK_TESTING
+
+#ifdef WITH_MEM_LEAK_TESTING
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
 #include <iostream>
 #include <fstream>
 
@@ -50,11 +58,16 @@ int main( int argc, char** argv )
 		v->render();
 		delete v;
 
+#ifdef WITH_MEM_LEAK_TESTING
+		bool leak = _CrtDumpMemoryLeaks();
+#endif
+
 		return 0;
 	}
 	catch( string& e )
 	{
 		logMessage( e );
 	}
+
 	return -1;
 }

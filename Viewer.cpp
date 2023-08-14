@@ -573,6 +573,8 @@ void Viewer::drawGlyphs()
 	renderText( buff, 10.0f, 10.0f, 0.5f );
 	glBindTexture( GL_TEXTURE_2D, 0 );
 	glyphs->unUseShaderProgram();
+
+	delete[] buff;
 }
 
 void Viewer::drawSolutionPoint(Double3d &solution, glm::mat4 &projection, glm::mat4 &view, glm::mat4 &model )
@@ -700,14 +702,13 @@ Viewer::~Viewer()
 	delete cuboid;
 
 	delete camera;
+	delete calculator;
 
 	// GLFW
 	glfwDestroyCursor( cursor );
 	glfwTerminate();
 
 	logger.flush();
-
-	delete calculator;
 }
 
 void Viewer::setViewport()
