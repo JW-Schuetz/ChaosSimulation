@@ -24,7 +24,7 @@ Calculator::Calculator()
 	}
 }
 
-void Calculator::changeMode( SYSTEM_MODE mode )
+void Calculator::setMode( SYSTEM_MODE mode )
 {
 	this->mode = mode;		// change mode
 
@@ -74,4 +74,9 @@ double Calculator::calcMaxCube( bool &cubeChanged )
 	if( abs( xODE[2] ) > maxCube ) { maxCube = abs( xODE[2] ); cubeChanged = true; }
 
 	return maxCube;
+}
+
+ode_state Calculator::getValue()
+{
+	return xODE;
 }

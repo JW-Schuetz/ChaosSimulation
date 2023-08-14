@@ -117,31 +117,26 @@ class Viewer
 
 	void createCursor();
 	void initFont();
-	void processInput( SYSTEM_MODE & );
+	void processInput( int & );
 	void fillVertices();
 	void prepareDrawing();
 
 	// ODE-stuff
-	runge_kutta4<ode_state> stepper;	// stepper Runge-Kutta 4. order
-	static ode_state xODE;				// system state (3-dim phase state)
 	static double maxCube;				// physical min/max. value, solution-cube
-	static bool systemModusChanged;
 
 public:
 	Viewer( string );
 	~Viewer();
 
 	void render();
-	void renderLoop( int &, size_t, char *, float &, float &, bool &, Double2d &, 
-		SYSTEM_MODE &, Lorenz *, Roessler * );
+	void renderLoop( ode_state &, int &, float &, float &, bool &, Double2d & );
 	void renderText( const string &, float, float, float );
 	void handleRotationMode( float, float &, float & );
-	void handleSystemMode( int &, SYSTEM_MODE, Lorenz *, Roessler * );
 	void handleMouseEvents( int &, bool &, Double2d & );
 	void clearTraceDisplay();
 	void calcMatrices( float &, glm::mat4 &, glm::mat4 &, glm::mat4 & );
 	void drawCube( glm::mat4 &, glm::mat4 &, glm::mat4 & );
-	void drawGlyphs( char *, size_t );
+	void drawGlyphs();
 	void drawSolutionPoint( Double3d &, glm::mat4 &, glm::mat4 &, glm::mat4 & );
 	void drawTracePoints( int, Double3d &, glm::mat4 &, glm::mat4 &, glm::mat4 & );
 	void drawAxes();

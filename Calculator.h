@@ -19,7 +19,8 @@ public:
 	Calculator();
 
 	ode_state step();
-	void changeMode( SYSTEM_MODE );
+	void setMode( SYSTEM_MODE );
 	void setInitValues( ode_state );
 	double calcMaxCube( bool & );
+	ode_state getValue();
 };

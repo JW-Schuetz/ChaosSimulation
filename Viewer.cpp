@@ -23,11 +23,9 @@ double Viewer::aspectRatio;
 int Viewer::windowWidth;
 int Viewer::windowHeight;
 bool Viewer::winMinimized;
-ode_state Viewer::xODE;
 ofstream Viewer::logger;
 VIEW_MODE Viewer::viewModus;
 ROTATION_MODE Viewer::rotationModus;
-bool Viewer::systemModusChanged;
 GLfloat Viewer::scale;
 bool Viewer::mouseButton1Event;
 bool Viewer::mouseButton2Event;
@@ -57,7 +55,6 @@ Viewer::Viewer( string logFile )
 
 	mouseButton1Event	= {};
 	mouseButton2Event	= {};
-	systemModusChanged	= {};
 
 	// Background
 	backColor = { 0.0f, 0.0f, 0.0f };	// background color
@@ -403,52 +400,26 @@ void Viewer::render()
 	float time			    = {};
 	float lastTime		    = {};
 	int index               = traceLength - 1;	// set index to last element
-	const size_t buffSize   = 50;
-	char *buff			    = new char[buffSize];
 	bool newInitialValue    = {};
 	Double2d initValues     = {};
-	SYSTEM_MODE systemModus = LORENZ;			// initial ODE-system to be solved
-	Lorenz *lor             = new Lorenz( 10.0, 28.0, 8.0 / 3.0, 0.001, { -20.0, 25.0, 0.0 } );
-	Roessler *roe           = new Roessler( 0.2, 0.2, 5.7, 0.01, { 0.1, 0.1, 0.1 } );
-
-	switch( systemModus )
-	{
-		case LORENZ:
-			xODE = lor->getInitState();
-			break;
-		case ROESSLER:
-			xODE = roe->getInitState();
-			break;
-	}
+	ode_state xODE			= calculator->getValue();
 
 	while( !glfwWindowShouldClose( window ) )
 	{
 		if( !winMinimized )		// do no calculation and no graphics if window is minimized
-			renderLoop( index, buffSize, buff, time, lastTime, newInitialValue, initValues,
-				systemModus, lor, roe );
+			renderLoop( xODE, index, time, lastTime, newInitialValue, initValues );
 
 		glfwPollEvents();		// poll GLFW events
 	}
-
-	delete[] buff;				// tidy up
-	delete lor;
-	delete roe;
 }
 
-void Viewer::renderLoop( int &index, size_t buffSize, char *buff, float &time,
-	float &lastTime, bool &newInitialValue, Double2d &initValues, SYSTEM_MODE &systemModus, 
-	Lorenz *lor, Roessler *roe )
+void Viewer::renderLoop( ode_state &xODE, int &index, float &time, float &lastTime, 
+	bool &newInitialValue, Double2d &initValues )
 {
 	float t = (float)glfwGetTime();	// time for rotation animation
 
 	handleRotationMode( t, time, lastTime );
 	handleMouseEvents( index, newInitialValue, initValues );
-
-	// update solution cube
-	bool cubeChanged = false;
-	if( abs( xODE[0] ) > maxCube ) { maxCube = abs( xODE[0] ); cubeChanged = true; }
-	if( abs( xODE[1] ) > maxCube ) { maxCube = abs( xODE[1] ); cubeChanged = true; }
-	if( abs( xODE[2] ) > maxCube ) { maxCube = abs( xODE[2] ); cubeChanged = true; }
 
 	bool changed {};
 	maxCube = calculator->calcMaxCube( changed );
@@ -474,12 +445,11 @@ void Viewer::renderLoop( int &index, size_t buffSize, char *buff, float &time,
 	calcMatrices( time, projection, view, model );
 	drawTracePoints( index, xODE, projection, view, model );
 	drawSolutionPoint( xODE, projection, view, model );
-	drawGlyphs( buff, buffSize );
+	drawGlyphs();
 	drawCube( projection, view, model );
 	drawAxes();
 
 	// solve ODE system -> calc next solution point
-	handleSystemMode( index, systemModus, lor, roe );
 	xODE = calculator->step();
 
 	// tidy up
@@ -491,7 +461,7 @@ void Viewer::renderLoop( int &index, size_t buffSize, char *buff, float &time,
 	if( index == -1 ) index = traceLength - 1;
 
 	glfwSwapBuffers( window );
-	processInput( systemModus );			// read keyboard
+	processInput( index );			// read keyboard
 }
 
 void Viewer::handleMouseEvents( int &index, bool &newInitialValue, Double2d &initValues )
@@ -501,11 +471,7 @@ void Viewer::handleMouseEvents( int &index, bool &newInitialValue, Double2d &ini
 		switch( viewModus )
 		{
 			case ZAXIS:							// transform. to physical coordinates in mouseButtonCallback()
-				xODE[0] = mousePhysX;			// set new initial (x,y)-values for ODE-solution
-				xODE[1] = mousePhysY;
-				xODE[2] = 0.0f;
-
-				calculator->setInitValues( xODE );
+				calculator->setInitValues( { mousePhysX, mousePhysY, 0.0 } );
 
 				clearTraceDisplay();
 
@@ -564,41 +530,6 @@ void Viewer::handleRotationMode( float t, float &time, float &lastTime )
 	lastTime = t;
 }
 
-void Viewer::handleSystemMode( int &index, SYSTEM_MODE systemModus, Lorenz *lor, Roessler *roe )
-{
-	switch( systemModus )
-	{
-		case LORENZ:
-			if( systemModusChanged )
-			{
-				systemModusChanged = {};
-				//maxCube            = -FLT_MAX;		// reset display scaling
-				//xODE               = lor->getInitState();
-
-				calculator->changeMode( LORENZ );
-
-				clearTraceDisplay();
-				index = traceLength;	// not "index = traceLength - 1" because of following line "--index;"
-			}
-			//stepper.do_step( *lor, xODE, 0.0, lor->getDeltaT() );
-			break;
-		case ROESSLER:
-			if( systemModusChanged )
-			{
-				systemModusChanged = {};
-				//maxCube            = -FLT_MAX;		// reset display scaling
-				//xODE               = roe->getInitState();
-
-				calculator->changeMode( ROESSLER );
-
-				clearTraceDisplay();
-				index = traceLength;	// not "index = traceLength - 1" because of following line "--index;"
-			}
-			//stepper.do_step( *roe, xODE, 0.0, roe->getDeltaT() );
-			break;
-	}
-}
-
 void Viewer::drawAxes()
 {
 	glLineWidth( axesWidth );
@@ -608,8 +539,11 @@ void Viewer::drawAxes()
 	axes->unUseShaderProgram();
 }
 
-void Viewer::drawGlyphs( char *buff, size_t buffSize )
+void Viewer::drawGlyphs()
 {
+	const size_t buffSize = 50;
+	char *buff = new char[buffSize];
+
 	glyphs->useShaderProgram();
 	glBindVertexArray( VAOGlyphs );
 	glActiveTexture( GL_TEXTURE0 );
@@ -825,7 +759,7 @@ void Viewer::renderText( const string &text, float x, float y, float txtScale )
 	}
 }
 
-void Viewer::processInput( SYSTEM_MODE &systemModus )
+void Viewer::processInput( int &index )
 {
 	if( glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS )	// escape program
 		glfwSetWindowShouldClose( window, true );
@@ -839,17 +773,17 @@ void Viewer::processInput( SYSTEM_MODE &systemModus )
 		rotationModus = RIGHT_ROTATION;
 	if( glfwGetKey( window, GLFW_KEY_L ) == GLFW_PRESS )		// solve Lorenz system
 	{
-		systemModus        = LORENZ;
-		systemModusChanged = true;
+		calculator->setMode( LORENZ );
 
-		calculator->changeMode( LORENZ );
+		clearTraceDisplay();
+		index = traceLength;	// not "index = traceLength - 1" because of following line "--index;"
 	}
 	if( glfwGetKey( window, GLFW_KEY_R ) == GLFW_PRESS )		// solve Roessler system
 	{
-		systemModus        = ROESSLER;
-		systemModusChanged = true;
+		calculator->setMode( ROESSLER );
 
-		calculator->changeMode( ROESSLER );
+		clearTraceDisplay();
+		index = traceLength;	// not "index = traceLength - 1" because of following line "--index;"
 	}
 }
 

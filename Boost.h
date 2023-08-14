@@ -8,7 +8,7 @@ using namespace std;
 using namespace boost::numeric::odeint;
 
 
-typedef array<double, 3> ode_state;
+typedef array<double,3> ode_state;
 
 typedef enum
 {
