@@ -23,10 +23,11 @@ Calculator::Calculator()
 			break;
 	}
 
-	calcMaxCube();		// recalculate maxCube
+	bool cubeChanged;
+	calcMaxCube( cubeChanged );		// recalculate maxCube
 }
 
-void Calculator::setMode( SYSTEM_MODE mode )
+void Calculator::setMode( SYSTEM_MODE mode, bool &cubeChanged )
 {
 	this->mode = mode;		// change mode
 
@@ -42,12 +43,12 @@ void Calculator::setMode( SYSTEM_MODE mode )
 			maxCube	= -FLT_MAX;					// reset display scaling
 			break;
 	}
-	calcMaxCube();			// recalculate maxCube
+	calcMaxCube( cubeChanged );		// recalculate maxCube
 
 	modeChanged = true;		// set changed marker
 }
 
-ode_state Calculator::step()
+ode_state Calculator::step( bool &cubeChanged )
 {
 	switch( mode )
 	{
@@ -59,21 +60,21 @@ ode_state Calculator::step()
 			stepper.do_step( *roessler, xODE, 0.0, roessler->getDeltaT() );
 			break;
 	}
-	calcMaxCube();		// recalculate maxCube
+	calcMaxCube( cubeChanged );		// recalculate maxCube
 
 	return xODE;
 }
 
-void Calculator::setInitValues( ode_state xODE )
+void Calculator::setInitValues( ode_state xODE, bool &cubeChanged )
 {
 	this->xODE = xODE;
 
-	calcMaxCube();		// recalculate maxCube
+	calcMaxCube( cubeChanged );		// recalculate maxCube
 }
 
-double Calculator::calcMaxCube()
+double Calculator::calcMaxCube( bool &cubeChanged )
 {
-	bool cubeChanged{};
+	cubeChanged = {};
 
 	if( abs( xODE[0] ) > maxCube ) { maxCube = abs( xODE[0] ); cubeChanged = true; }
 	if( abs( xODE[1] ) > maxCube ) { maxCube = abs( xODE[1] ); cubeChanged = true; }

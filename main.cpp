@@ -4,7 +4,7 @@
 
 #include "Common.h"
 #include "DateTime.h"
-#include "Simulation.h"
+#include "Viewer.h"
 
 
 using namespace std;
@@ -46,9 +46,10 @@ int main( int argc, char** argv )
 
 	try
 	{
-		Simulation *s = new Simulation( argv[1] );
-		s->render();
-		delete s;
+		Viewer *v = new Viewer( argv[1] );
+		v->render();
+		delete v;
+
 		return 0;
 	}
 	catch( string& e )

@@ -165,7 +165,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Roessler.cpp" />
     <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="Viewer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -178,7 +177,6 @@
     <ClInclude Include="Roessler.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderSources.h" />
-    <ClInclude Include="Simulation.h" />
     <ClInclude Include="Viewer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

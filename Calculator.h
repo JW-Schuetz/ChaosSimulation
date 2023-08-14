@@ -18,10 +18,10 @@ class Calculator
 public:
 	Calculator();
 
-	ode_state step();
-	void setMode( SYSTEM_MODE );
-	void setInitValues( ode_state );
-	double calcMaxCube();
+	ode_state step( bool & );
+	void setMode( SYSTEM_MODE, bool & );
+	void setInitValues( ode_state, bool & );
+	double calcMaxCube( bool & );
 	ode_state getValue();
 	double getMaxCube();
 };

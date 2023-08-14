@@ -419,8 +419,7 @@ void Viewer::renderLoop( ode_state &xODE, int &index, float &time, float &lastTi
 	handleRotationMode( t, time, lastTime );
 	handleMouseEvents( index, newInitialValue, initValues );
 
-	// evtl. Cursorposition korrigieren
-	if( newInitialValue )
+	if( newInitialValue )	// new setting of initial values
 	{
 		xODE = calculator->getValue();
 
@@ -429,7 +428,8 @@ void Viewer::renderLoop( ode_state &xODE, int &index, float &time, float &lastTi
 			double mouseViewPortX, mouseViewPortY, mouseRawX, mouseRawY;	// local variables
 
 			double maxCube = calculator->getMaxCube();
-			physToNormalizedViewportCoordinates( maxCube, initValues[0], initValues[1], mouseViewPortX, mouseViewPortY );
+			physToNormalizedViewportCoordinates( maxCube, initValues[0], initValues[1], 
+				mouseViewPortX, mouseViewPortY );
 			normalizedViewportToMouseRawCoordinates( mouseViewPortX, mouseViewPortY, mouseRawX, mouseRawY );
 			glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
 			glfwSetCursorPos( window, mouseRawX, mouseRawY );
@@ -452,7 +452,9 @@ void Viewer::renderLoop( ode_state &xODE, int &index, float &time, float &lastTi
 	drawAxes();
 
 	// solve ODE system -> calc next solution point
-	xODE = calculator->step();
+	bool cubeChanged;
+	xODE = calculator->step( cubeChanged );
+	if( cubeChanged ) mouseRawToPhysCoordinates();	// reflect possible change of maxCube
 
 	// tidy up
 	glBindBuffer( GL_ARRAY_BUFFER, 0 );
@@ -473,7 +475,8 @@ void Viewer::handleMouseEvents( int &index, bool &newInitialValue, Double2d &ini
 		switch( viewModus )
 		{
 			case ZAXIS:							// transform. to physical coordinates in mouseButtonCallback()
-				calculator->setInitValues( { mousePhysX, mousePhysY, 0.0 } );
+				bool cubeChanged;
+				calculator->setInitValues( { mousePhysX, mousePhysY, 0.0 }, cubeChanged );
 
 				clearTraceDisplay();
 
@@ -777,14 +780,20 @@ void Viewer::processInput( int &index )
 		rotationModus = RIGHT_ROTATION;
 	if( glfwGetKey( window, GLFW_KEY_L ) == GLFW_PRESS )		// solve Lorenz system
 	{
-		calculator->setMode( LORENZ );
+		bool cubeChanged;
+		calculator->setMode( LORENZ, cubeChanged );
+		if( cubeChanged ) mouseRawToPhysCoordinates();			// reflect possible change of maxCube
+
 		clearTraceDisplay();
 
 		index = traceLength - 1;								// set index to last element
 	}
 	if( glfwGetKey( window, GLFW_KEY_R ) == GLFW_PRESS )		// solve Roessler system
 	{
-		calculator->setMode( ROESSLER );
+		bool cubeChanged;
+		calculator->setMode( ROESSLER, cubeChanged );
+		if( cubeChanged ) mouseRawToPhysCoordinates();			// reflect possible change of maxCube
+
 		clearTraceDisplay();
 
 		index = traceLength - 1;								// set index to last element
@@ -866,7 +875,7 @@ void Viewer::scrollCallback( GLFWwindow *window, double, double yoffset )
 			if( scale < minScale ) scale = minScale;
 			if( scale > maxScale ) scale = maxScale;
 
-			mouseRawToPhysCoordinates();						// display right coordinates after scroll
+			mouseRawToPhysCoordinates();						// display right coordinates after scrolling
 			break;
 	}
 }
