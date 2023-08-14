@@ -22,6 +22,8 @@ Calculator::Calculator()
 			xODE = roessler->getInitState();	// set initial values
 			break;
 	}
+
+	calcMaxCube();		// recalculate maxCube
 }
 
 void Calculator::setMode( SYSTEM_MODE mode )
@@ -40,8 +42,9 @@ void Calculator::setMode( SYSTEM_MODE mode )
 			maxCube	= -FLT_MAX;					// reset display scaling
 			break;
 	}
+	calcMaxCube();			// recalculate maxCube
 
-	modeChanged = true;							// set marker
+	modeChanged = true;		// set changed marker
 }
 
 ode_state Calculator::step()
@@ -56,6 +59,7 @@ ode_state Calculator::step()
 			stepper.do_step( *roessler, xODE, 0.0, roessler->getDeltaT() );
 			break;
 	}
+	calcMaxCube();		// recalculate maxCube
 
 	return xODE;
 }
@@ -63,11 +67,13 @@ ode_state Calculator::step()
 void Calculator::setInitValues( ode_state xODE )
 {
 	this->xODE = xODE;
+
+	calcMaxCube();		// recalculate maxCube
 }
 
-double Calculator::calcMaxCube( bool &cubeChanged )
+double Calculator::calcMaxCube()
 {
-	cubeChanged = false;
+	bool cubeChanged{};
 
 	if( abs( xODE[0] ) > maxCube ) { maxCube = abs( xODE[0] ); cubeChanged = true; }
 	if( abs( xODE[1] ) > maxCube ) { maxCube = abs( xODE[1] ); cubeChanged = true; }
@@ -79,4 +85,9 @@ double Calculator::calcMaxCube( bool &cubeChanged )
 ode_state Calculator::getValue()
 {
 	return xODE;
+}
+
+double Calculator::getMaxCube()
+{
+	return maxCube;
 }

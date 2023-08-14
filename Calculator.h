@@ -21,6 +21,7 @@ public:
 	ode_state step();
 	void setMode( SYSTEM_MODE );
 	void setInitValues( ode_state );
-	double calcMaxCube( bool & );
+	double calcMaxCube();
 	ode_state getValue();
+	double getMaxCube();
 };

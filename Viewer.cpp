@@ -35,7 +35,6 @@ double Viewer::mouseViewPortX;
 double Viewer::mouseViewPortY;
 double Viewer::mousePhysX;
 double Viewer::mousePhysY;
-double Viewer::maxCube;
 
 Viewer::Viewer( string logFile )
 {
@@ -46,7 +45,6 @@ Viewer::Viewer( string logFile )
 	windowWidth  = 2000;
 	windowHeight = 2000;
 	edge		 = 50;
-	maxCube		 = -FLT_MAX;
 
 	viewModus = ZAXIS;
 	scale	  = 1.0f;
@@ -421,19 +419,23 @@ void Viewer::renderLoop( ode_state &xODE, int &index, float &time, float &lastTi
 	handleRotationMode( t, time, lastTime );
 	handleMouseEvents( index, newInitialValue, initValues );
 
-	bool changed {};
-	maxCube = calculator->calcMaxCube( changed );
-
-	if( newInitialValue && ( index < traceLength - cursorRedrawTraceCount ) )
+	// evtl. Cursorposition korrigieren
+	if( newInitialValue )
 	{
-		double mouseViewPortX, mouseViewPortY, mouseRawX, mouseRawY;	// local variables
+		xODE = calculator->getValue();
 
-		physToNormalizedViewportCoordinates( initValues[0], initValues[1], mouseViewPortX, mouseViewPortY );
-		normalizedViewportToMouseRawCoordinates( mouseViewPortX, mouseViewPortY, mouseRawX, mouseRawY );
-		glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
-		glfwSetCursorPos( window, mouseRawX, mouseRawY );
+		if( index < traceLength - cursorRedrawTraceCount )
+		{
+			double mouseViewPortX, mouseViewPortY, mouseRawX, mouseRawY;	// local variables
 
-		newInitialValue = false;
+			double maxCube = calculator->getMaxCube();
+			physToNormalizedViewportCoordinates( maxCube, initValues[0], initValues[1], mouseViewPortX, mouseViewPortY );
+			normalizedViewportToMouseRawCoordinates( mouseViewPortX, mouseViewPortY, mouseRawX, mouseRawY );
+			glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
+			glfwSetCursorPos( window, mouseRawX, mouseRawY );
+
+			newInitialValue = false;
+		}
 	}
 
 	glClear( GL_COLOR_BUFFER_BIT );	// clear screen with backColor
@@ -457,8 +459,8 @@ void Viewer::renderLoop( ode_state &xODE, int &index, float &time, float &lastTi
 	glBindVertexArray( 0 );
 	glFlush();
 
-	--index;				// next index and index limitation
-	if( index == -1 ) index = traceLength - 1;
+	--index;									// next index
+	if( index == -1 ) index = traceLength - 1;	// index limitation, set index to last element
 
 	glfwSwapBuffers( window );
 	processInput( index );			// read keyboard
@@ -623,6 +625,8 @@ void Viewer::drawCube( glm::mat4 &projection, glm::mat4 &view, glm::mat4 &model 
 
 void Viewer::calcMatrices( float &time, glm::mat4 &projection, glm::mat4 &view, glm::mat4 &model )
 {
+	double maxCube = calculator->getMaxCube();
+
 	float X = (float)( maxCube * aspectRatio );
 
 	switch( viewModus )
@@ -774,16 +778,16 @@ void Viewer::processInput( int &index )
 	if( glfwGetKey( window, GLFW_KEY_L ) == GLFW_PRESS )		// solve Lorenz system
 	{
 		calculator->setMode( LORENZ );
-
 		clearTraceDisplay();
-		index = traceLength;	// not "index = traceLength - 1" because of following line "--index;"
+
+		index = traceLength - 1;								// set index to last element
 	}
 	if( glfwGetKey( window, GLFW_KEY_R ) == GLFW_PRESS )		// solve Roessler system
 	{
 		calculator->setMode( ROESSLER );
-
 		clearTraceDisplay();
-		index = traceLength;	// not "index = traceLength - 1" because of following line "--index;"
+
+		index = traceLength - 1;								// set index to last element
 	}
 }
 
@@ -802,12 +806,14 @@ void Viewer::normalizedViewportToMouseRawCoordinates( double viewX, double viewY
 
 void Viewer::normalizedViewportToPhysCoordinates()
 {
+	double maxCube = calculator->getMaxCube();
+
 	double a   = maxCube / scale;
 	mousePhysX = a * mouseViewPortX * aspectRatio;
 	mousePhysY = a * mouseViewPortY;
 }
 
-void Viewer::physToNormalizedViewportCoordinates( double physX, double physY, 
+void Viewer::physToNormalizedViewportCoordinates( double maxCube, double physX, double physY, 
 	double &viewX, double &viewY )
 {
 	double a = maxCube / scale;
@@ -819,7 +825,6 @@ void Viewer::mouseRawToPhysCoordinates()
 {
 	// mousePosXY coordinates counts from left upper window corner (0, 0) to
 	// right lower window corner (width + 2*top, height + 2*left)
-
 	mouseRawToNormalizedViewportCoordinates();
 	normalizedViewportToPhysCoordinates();
 }
@@ -860,6 +865,8 @@ void Viewer::scrollCallback( GLFWwindow *window, double, double yoffset )
 
 			if( scale < minScale ) scale = minScale;
 			if( scale > maxScale ) scale = maxScale;
+
+			mouseRawToPhysCoordinates();						// display right coordinates after scroll
 			break;
 	}
 }

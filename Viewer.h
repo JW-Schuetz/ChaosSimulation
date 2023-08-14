@@ -73,7 +73,7 @@ static const double maxScale		       = 5.0f;		// max. allowed scale factor
 
 class Viewer
 {
-	static Calculator *calculator;					// ODE solver
+	static Calculator *calculator;					// ODE solver class
 
 	static GLfloat scale;							// scale factor
 	static Camera *camera;
@@ -115,14 +115,11 @@ class Viewer
 
 	Shader *axes, *point, *pointTrace, *glyphs, *cuboid;
 
-	void createCursor();
 	void initFont();
-	void processInput( int & );
+	void createCursor();
 	void fillVertices();
 	void prepareDrawing();
-
-	// ODE-stuff
-	static double maxCube;				// physical min/max. value, solution-cube
+	void processInput( int & );
 
 public:
 	Viewer( string );
@@ -167,7 +164,7 @@ private:
 	static void normalizedViewportToMouseRawCoordinates( double, double, double &, double & );
 
 	static void normalizedViewportToPhysCoordinates();
-	static void physToNormalizedViewportCoordinates( double, double, double &, double & );
+	static void physToNormalizedViewportCoordinates( double, double, double, double &, double & );
 
 	static void mouseRawToPhysCoordinates();
 	static bool mouseInViewportInteriour();
