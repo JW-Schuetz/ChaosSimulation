@@ -369,13 +369,15 @@ void Viewer::prepareDrawing()
 	glBindBuffer( GL_ARRAY_BUFFER, 0 );
 	glBindVertexArray( 0 );
 
-	// general settings
+	// set background color
 	glClearColor( backColor[0], backColor[1], backColor[2], 1.0f );
+
+	// set static uniforms (object colors)
+	setStaticUniforms();
 }
 
-void Viewer::render()
+void Viewer::setStaticUniforms()
 {
-	// set uniforms
 	axes->useShaderProgram();
 	axes->setVec3( "axesColor", axesColor[0], axesColor[1], axesColor[2] );
 	axes->unUseShaderProgram();
@@ -385,65 +387,50 @@ void Viewer::render()
 	point->unUseShaderProgram();
 
 	glyphs->useShaderProgram();
-	glm::mat4 glyphsProjection = glm::ortho( 0.0f, (float)windowWidth, 0.0f, (float)windowHeight );
 	glyphs->setVec3( "glyphsColor", glyphsColor[0], glyphsColor[1], glyphsColor[2] );
-	glyphs->setMat4( "projection", glyphsProjection );
 	glyphs->unUseShaderProgram();
 
 	cuboid->useShaderProgram();
 	cuboid->setVec3( "cuboidColor", cuboidColor[0], cuboidColor[1], cuboidColor[2] );
 	cuboid->unUseShaderProgram();
+}
+
+void Viewer::render()
+{
+	// set dependent uniform
+	glyphs->useShaderProgram();
+	glm::mat4 glyphsProjection = glm::ortho( 0.0f, (float)windowWidth, 0.0f, (float)windowHeight );
+	glyphs->setMat4( "projection", glyphsProjection );
 
 	// initialize function call parameters
-	float time			    = {};
-	float lastTime		    = {};
-	int index               = traceLength - 1;	// set index to last element
-	bool newInitialValue    = {};
-	Double2d initValues     = {};
-	ode_state xODE			= calculator->getValue();
+	float time	   = {};
+	float lastTime = {};
+	int index	   = traceLength - 1;	// set index to last element
 
 	while( !glfwWindowShouldClose( window ) )
 	{
-		if( !winMinimized )		// do no calculation and no graphics if window is minimized
-			renderLoop( xODE, index, time, lastTime, newInitialValue, initValues );
+		if( !winMinimized )	// do no calculation and no graphics if window is minimized
+			renderLoop( index, time, lastTime );
 
-		glfwPollEvents();		// poll GLFW events
+		glfwPollEvents();				// poll GLFW events
 	}
 }
 
-void Viewer::renderLoop( ode_state &xODE, int &index, float &time, float &lastTime, 
-	bool &newInitialValue, Double2d &initValues )
+void Viewer::renderLoop( int &index, float &time, float &lastTime )
 {
-	float t = (float)glfwGetTime();	// time for rotation animation
+	float t = (float)glfwGetTime();		// time for rotation animation
 
 	handleRotationMode( t, time, lastTime );
-	handleMouseEvents( index, newInitialValue, initValues );
+	handleMouseEvents( index );
 
-	if( newInitialValue )	// new setting of initial values
-	{
-		xODE = calculator->getValue();
+	glClear( GL_COLOR_BUFFER_BIT );		// clear screen with backColor
 
-		if( index < traceLength - cursorRedrawTraceCount )
-		{
-			double mouseViewPortX, mouseViewPortY, mouseRawX, mouseRawY;	// local variables
-
-			double maxCube = calculator->getMaxCube();
-			physToNormalizedViewportCoordinates( maxCube, initValues[0], initValues[1], 
-				mouseViewPortX, mouseViewPortY );
-			normalizedViewportToMouseRawCoordinates( mouseViewPortX, mouseViewPortY, mouseRawX, mouseRawY );
-			glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
-			glfwSetCursorPos( window, mouseRawX, mouseRawY );
-
-			newInitialValue = false;
-		}
-	}
-
-	glClear( GL_COLOR_BUFFER_BIT );	// clear screen with backColor
-
+	// initialize matrices
 	glm::mat4 projection = glm::mat4( 1.0f );
 	glm::mat4 view = glm::mat4( 1.0f );
 	glm::mat4 model = glm::mat4( 1.0f );
 
+	ode_state xODE = calculator->getValue();
 	calcMatrices( time, projection, view, model );
 	drawTracePoints( index, xODE, projection, view, model );
 	drawSolutionPoint( xODE, projection, view, model );
@@ -453,7 +440,7 @@ void Viewer::renderLoop( ode_state &xODE, int &index, float &time, float &lastTi
 
 	// solve ODE system -> calc next solution point
 	bool cubeChanged;
-	xODE = calculator->step( cubeChanged );
+	calculator->step( cubeChanged );
 	if( cubeChanged ) mouseRawToPhysCoordinates();	// reflect possible change of maxCube
 
 	// tidy up
@@ -468,25 +455,19 @@ void Viewer::renderLoop( ode_state &xODE, int &index, float &time, float &lastTi
 	processInput( index );			// read keyboard
 }
 
-void Viewer::handleMouseEvents( int &index, bool &newInitialValue, Double2d &initValues )
+void Viewer::handleMouseEvents( int &index )
 {
 	if( mouseButton1Event )
 	{
 		switch( viewModus )
 		{
-			case ZAXIS:							// transform. to physical coordinates in mouseButtonCallback()
+			case ZAXIS:
+				// set new init values
 				bool cubeChanged;
 				calculator->setInitValues( { mousePhysX, mousePhysY, 0.0 }, cubeChanged );
 
 				clearTraceDisplay();
-
 				index = traceLength - 1;		// reset index to last element again
-
-				initValues[0] = mousePhysX;
-				initValues[1] = mousePhysY;
-				newInitialValue = true;
-
-				glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN );
 				break;
 			case ROTATE_XAXIS:
 			case ROTATE_YAXIS:

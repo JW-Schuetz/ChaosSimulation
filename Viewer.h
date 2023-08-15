@@ -65,7 +65,6 @@ typedef enum
 
 
 static const int	traceLength		       = 20000;		// trace length [points]
-static const int	cursorRedrawTraceCount = 500;		// wait trace points for cursor redraw [points]
 static const double scrollIncrement	       = 0.05f;		// scale increment of mouse scroll wheel
 static const double minScale		       = 0.1f;		// min. allowed scale factor
 static const double maxScale		       = 5.0f;		// max. allowed scale factor
@@ -126,10 +125,10 @@ public:
 	~Viewer();
 
 	void render();
-	void renderLoop( ode_state &, int &, float &, float &, bool &, Double2d & );
+	void renderLoop( int &, float &, float & );
 	void renderText( const string &, float, float, float );
 	void handleRotationMode( float, float &, float & );
-	void handleMouseEvents( int &, bool &, Double2d & );
+	void handleMouseEvents( int & );
 	void clearTraceDisplay();
 	void calcMatrices( float &, glm::mat4 &, glm::mat4 &, glm::mat4 & );
 	void drawCube( glm::mat4 &, glm::mat4 &, glm::mat4 & );
@@ -137,6 +136,7 @@ public:
 	void drawSolutionPoint( Double3d &, glm::mat4 &, glm::mat4 &, glm::mat4 & );
 	void drawTracePoints( int, Double3d &, glm::mat4 &, glm::mat4 &, glm::mat4 & );
 	void drawAxes();
+	void setStaticUniforms();
 
 protected:
 	static ofstream logger;
