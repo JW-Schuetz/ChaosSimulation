@@ -157,7 +157,7 @@ GLFWwindow* Viewer::initGL()
 	glfwWindowHint( GLFW_REFRESH_RATE, videoMode->refreshRate );
 
 	// create window
-	window = glfwCreateWindow( windowWidth, windowHeight, "Lorenz-Attractor", NULL, NULL );
+	window = glfwCreateWindow( windowWidth, windowHeight, "Attractor", NULL, NULL );
 	if( window == NULL )
 		throw string{ "Failed to create GLFW window" };
 
@@ -434,8 +434,8 @@ void Viewer::renderLoop( int &index, float &time, float &lastTime )
 	calcMatrices( time, projection, view, model );
 	drawTracePoints( index, xODE, projection, view, model );
 	drawSolutionPoint( xODE, projection, view, model );
-	drawGlyphs();
 	drawCube( projection, view, model );
+	drawGlyphs();
 	drawAxes();
 
 	// solve ODE system -> calc next solution point
@@ -530,6 +530,18 @@ void Viewer::drawGlyphs()
 	const size_t buffSize = 50;
 	char *buff = new char[buffSize];
 
+	static double physX = mousePhysX;
+	static double physY = mousePhysY;
+	static GLfloat scl  = scale;
+
+	// refresh text only if mouse is in viewpoint interiour
+	if( mouseInViewportInteriour() )
+	{
+		physX = mousePhysX;
+		physY = mousePhysY;
+		scl   = scale;
+	}
+
 	glyphs->useShaderProgram();
 	glBindVertexArray( VAOGlyphs );
 	glActiveTexture( GL_TEXTURE0 );
@@ -538,16 +550,16 @@ void Viewer::drawGlyphs()
 	{
 		case ZAXIS:
 			snprintf( buff, buffSize, "x = % 2.4f,  y = % 2.4f,  s = % 1.2f", 
-				mousePhysX, mousePhysY, scale );
+				physX, physY, scl );
 			break;
 		case ROTATE_XAXIS:
-			snprintf( buff, buffSize, "x-axis,  s = % 1.2f", scale );
+			snprintf( buff, buffSize, "x-axis,  s = % 1.2f", scl );
 			break;
 		case ROTATE_YAXIS:
-			snprintf( buff, buffSize, "y-axis,  s = % 1.2f", scale );
+			snprintf( buff, buffSize, "y-axis,  s = % 1.2f", scl );
 			break;
 		case MOUSECONTROL:
-			snprintf( buff, buffSize, "mouse,  s = % 1.2f", scale );
+			snprintf( buff, buffSize, "mouse,  s = % 1.2f", scl );
 			break;
 		default:
 			snprintf( buff, buffSize, "" );
@@ -711,46 +723,6 @@ void Viewer::setViewport()
 	}
 }
 
-void Viewer::renderText( const string &text, float x, float y, float txtScale )
-{
-	string::const_iterator c;		// iterate through all characters
-
-	for( c = text.begin(); c != text.end(); ++c )
-	{
-		Character ch = characters[*c];
-
-		float xpos = x + ch.bearing.x * txtScale;
-		float ypos = y - ( ch.size.y - ch.bearing.y ) * txtScale;
-
-		float w = ch.size.x * txtScale;
-		float h = ch.size.y * txtScale;
-
-		// update VBO for each character
-		float vertices[6][4] = {
-			{xpos, ypos + h, 0.0f, 0.0f},
-			{xpos, ypos, 0.0f, 1.0f},
-			{xpos + w, ypos, 1.0f, 1.0f},
-			{xpos, ypos + h, 0.0f, 0.0f},
-			{xpos + w, ypos, 1.0f, 1.0f},
-			{xpos + w, ypos + h, 1.0f, 0.0f}
-		};
-
-		// render glyph texture over quad
-		glBindTexture( GL_TEXTURE_2D, ch.textureID );
-
-		// update content of VBO memory
-		glBindBuffer( GL_ARRAY_BUFFER, VBOGlyphs );
-		glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( vertices ), vertices );
-		glBindBuffer( GL_ARRAY_BUFFER, 0 );
-
-		// render quad
-		glDrawArrays( GL_TRIANGLES, 0, 6 );
-
-		// advance cursors for next glyph (advance is 1/64 pixels)
-		x += ( ch.advance >> 6 ) * txtScale; // bitshift by 6 (2^6 = 64)
-	}
-}
-
 void Viewer::processInput( int &index )
 {
 	if( glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS )	// escape program
@@ -766,14 +738,12 @@ void Viewer::processInput( int &index )
 	if( glfwGetKey( window, GLFW_KEY_L ) == GLFW_PRESS )		// solve Lorenz system
 	{
 		calculator->setMode( LORENZ );
-
 		clearTraceDisplay();
 		index = traceLength - 1;								// set index to last element
 	}
 	if( glfwGetKey( window, GLFW_KEY_R ) == GLFW_PRESS )		// solve Roessler system
 	{
 		calculator->setMode( ROESSLER );
-
 		clearTraceDisplay();
 		index = traceLength - 1;								// set index to last element
 	}
@@ -875,6 +845,46 @@ void Viewer::mouseButtonCallback( GLFWwindow *window, int button, int action, in
 				if( action == GLFW_PRESS ) mouseButton2Event = true;
 				break;
 		}
+}
+
+void Viewer::renderText( const string &text, float x, float y, float txtScale )
+{
+	string::const_iterator c;		// iterate through all characters
+
+	for( c = text.begin(); c != text.end(); ++c )
+	{
+		Character ch = characters[*c];
+
+		float xpos = x + ch.bearing.x * txtScale;
+		float ypos = y - ( ch.size.y - ch.bearing.y ) * txtScale;
+
+		float w = ch.size.x * txtScale;
+		float h = ch.size.y * txtScale;
+
+		// update VBO for each character
+		float vertices[6][4] = {
+			{xpos, ypos + h, 0.0f, 0.0f},
+			{xpos, ypos, 0.0f, 1.0f},
+			{xpos + w, ypos, 1.0f, 1.0f},
+			{xpos, ypos + h, 0.0f, 0.0f},
+			{xpos + w, ypos, 1.0f, 1.0f},
+			{xpos + w, ypos + h, 1.0f, 0.0f}
+		};
+
+		// render glyph texture over quad
+		glBindTexture( GL_TEXTURE_2D, ch.textureID );
+
+		// update content of VBO memory
+		glBindBuffer( GL_ARRAY_BUFFER, VBOGlyphs );
+		glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( vertices ), vertices );
+		glBindBuffer( GL_ARRAY_BUFFER, 0 );
+
+		// render quad
+		glDrawArrays( GL_TRIANGLES, 0, 6 );
+
+		// advance cursors for next glyph (advance is 1/64 pixels)
+		x += ( ch.advance >> 6 ) * txtScale; // bitshift by 6 (2^6 = 64)
+	}
 }
 
 void Viewer::createCursor()
