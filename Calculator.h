@@ -20,7 +20,7 @@ public:
 	~Calculator();
 
 	ode_state step( bool & );
-	void setMode( SYSTEM_MODE, bool & );
+	void setMode( SYSTEM_MODE );
 	void setInitValues( ode_state, bool & );
 	double calcMaxCube( bool & );
 	ode_state getValue();

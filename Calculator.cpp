@@ -33,7 +33,7 @@ Calculator::~Calculator()
 	delete lorenz;
 }
 
-void Calculator::setMode( SYSTEM_MODE mode, bool &cubeChanged )
+void Calculator::setMode( SYSTEM_MODE mode )
 {
 	this->mode = mode;		// change mode
 
@@ -49,9 +49,6 @@ void Calculator::setMode( SYSTEM_MODE mode, bool &cubeChanged )
 			maxCube	= -FLT_MAX;					// reset display scaling
 			break;
 	}
-	calcMaxCube( cubeChanged );		// recalculate maxCube
-
-	modeChanged = true;		// set changed marker
 }
 
 ode_state Calculator::step( bool &cubeChanged )

@@ -397,11 +397,6 @@ void Viewer::setStaticUniforms()
 
 void Viewer::render()
 {
-	// set dependent uniform
-	glyphs->useShaderProgram();
-	glm::mat4 glyphsProjection = glm::ortho( 0.0f, (float)windowWidth, 0.0f, (float)windowHeight );
-	glyphs->setMat4( "projection", glyphsProjection );
-
 	// initialize function call parameters
 	float time	   = {};
 	float lastTime = {};
@@ -418,6 +413,11 @@ void Viewer::render()
 
 void Viewer::renderLoop( int &index, float &time, float &lastTime )
 {
+	// set dependent uniform
+	glyphs->useShaderProgram();
+	glm::mat4 glyphsProjection = glm::ortho( 0.0f, (float)windowWidth, 0.0f, (float)windowHeight );
+	glyphs->setMat4( "projection", glyphsProjection );
+
 	float t = (float)glfwGetTime();		// time for rotation animation
 
 	handleRotationMode( t, time, lastTime );
@@ -548,6 +548,9 @@ void Viewer::drawGlyphs()
 			break;
 		case MOUSECONTROL:
 			snprintf( buff, buffSize, "mouse,  s = % 1.2f", scale );
+			break;
+		default:
+			snprintf( buff, buffSize, "" );
 			break;
 	}
 
@@ -762,22 +765,16 @@ void Viewer::processInput( int &index )
 		rotationModus = RIGHT_ROTATION;
 	if( glfwGetKey( window, GLFW_KEY_L ) == GLFW_PRESS )		// solve Lorenz system
 	{
-		bool cubeChanged;
-		calculator->setMode( LORENZ, cubeChanged );
-		if( cubeChanged ) mouseRawToPhysCoordinates();			// reflect possible change of maxCube
+		calculator->setMode( LORENZ );
 
 		clearTraceDisplay();
-
 		index = traceLength - 1;								// set index to last element
 	}
 	if( glfwGetKey( window, GLFW_KEY_R ) == GLFW_PRESS )		// solve Roessler system
 	{
-		bool cubeChanged;
-		calculator->setMode( ROESSLER, cubeChanged );
-		if( cubeChanged ) mouseRawToPhysCoordinates();			// reflect possible change of maxCube
+		calculator->setMode( ROESSLER );
 
 		clearTraceDisplay();
-
 		index = traceLength - 1;								// set index to last element
 	}
 }
