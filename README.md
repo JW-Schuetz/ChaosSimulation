@@ -22,6 +22,7 @@ Some display modes of the ODE-solution are available:
 * keybord key FORWARD: change rotation direction to forward
 * keybord key BACKWARD: change rotation direction to backward![LorenzAttractor]
 * keyboard keys UP/DOWN: stop rotation
+* keyboard key ESC exit the program
 
 ## Screenshot display mode D:
   
