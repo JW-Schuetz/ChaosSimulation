@@ -19,7 +19,6 @@ GLsizei Viewer::edge;
 GLsizei Viewer::viewPortWidth;
 GLsizei Viewer::viewPortHeight;
 double Viewer::aspectRatio;
-
 int Viewer::windowWidth;
 int Viewer::windowHeight;
 bool Viewer::winMinimized;
@@ -452,7 +451,7 @@ void Viewer::renderLoop( int &index, float &time, float &lastTime )
 	if( index == -1 ) index = traceLength - 1;	// index limitation, set index to last element
 
 	glfwSwapBuffers( window );
-	processInput( index );			// read keyboard
+	processInput( index );						// read keyboard
 }
 
 void Viewer::handleMouseEvents( int &index )

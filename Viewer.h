@@ -72,6 +72,11 @@ static const double maxScale		       = 5.0f;		// max. allowed scale factor
 
 class Viewer
 {
+	// private data
+	GLFWwindow *window;
+	GLFWcursor *cursor;
+
+	// private static data
 	static Calculator *calculator;					// ODE solver class
 
 	static GLfloat scale;							// scale factor
@@ -83,11 +88,18 @@ class Viewer
 	static double mousePhysX, mousePhysY;			// mouse in physical coordinate system
 	static bool mouseButton1Event, mouseButton2Event;
 
-	// OpenGL-stuff
+	static GLsizei edge;			// top/bottom/left/right offset viewport to client windows area
+	static GLsizei viewPortWidth;	// viewport width  (frameBufferWidth  - 2*left)
+	static GLsizei viewPortHeight;	// viewport height (frameBufferHeight - 2*top )
+	static double aspectRatio;		// total aspect-ratio
+	static int windowWidth;			// window width (viewPortWidth  + 2*left)
+	static int windowHeight;		// window height (viewPortHeight + 2*top )
+	static bool winMinimized;		// window is in minimized state
+
+	// OpenGL data
 	GLfloat axesWidth;					// axes width
 	GLfloat pointSize;					// point size
 	GLfloat tracePointSize;				// trace point size
-
 	GLColor backColor;					// background color
 	GLColor axesColor;					// axes color
 	GLColor pointColor;					// point color
@@ -96,35 +108,29 @@ class Viewer
 	GLColor glyphsColor;				// glyphs color
 	GLColor cuboidColor;				// cuboid color
 
-	unsigned int VBOAxes, VBOPoint, VBOPointTrace, VBOGlyphs;
-	unsigned int VAOAxes, VAOPoint, VAOPointTrace, VAOGlyphs;
-
-	array<GLCoor3d,4> verticesAxes;
-	array<GLCoor3d,1> verticesPoint;
-	array<GLTraceVertex,traceLength> *verticesTrace;
-
+	unsigned int VBOAxes, VBOPoint;
+	unsigned int VBOPointTrace, VBOGlyphs;
+	unsigned int VAOAxes, VAOPoint;
+	unsigned int VAOPointTrace, VAOGlyphs;
 	unsigned int VBOCuboid;
 	unsigned int VBOCuboidElement;
 	unsigned int VAOCuboid;
 
+	array<GLCoor3d,4> verticesAxes;
+	array<GLCoor3d,1> verticesPoint;
+	array<GLTraceVertex,traceLength> *verticesTrace;
 	array<GLCoor3d,8> verticesCuboid;
 	array<GLuint,24> indicesCuboid;
-
 	map<char, Character> characters;
-
 	Shader *axes, *point, *pointTrace, *glyphs, *cuboid;
 
+	// private functions
+	GLFWwindow *initGL();
 	void initFont();
 	void createCursor();
 	void fillVertices();
 	void prepareDrawing();
 	void processInput( int & );
-
-public:
-	Viewer( string );
-	~Viewer();
-
-	void render();
 	void renderLoop( int &, float &, float & );
 	void renderText( const string &, float, float, float );
 	void handleRotationMode( float, float &, float & );
@@ -138,41 +144,27 @@ public:
 	void drawAxes();
 	void setStaticUniforms();
 
-protected:
-	static ofstream logger;
-
-private:
-	static GLsizei edge;			// top/bottom/left/right offset viewport to client windows area
-
-	static GLsizei viewPortWidth;	// viewport width  (frameBufferWidth  - 2*left)
-	static GLsizei viewPortHeight;	// viewport height (frameBufferHeight - 2*top )
-	static double aspectRatio;		// total aspect-ratio
-
-	static int windowWidth;			// window width (viewPortWidth  + 2*left)
-	static int windowHeight;		// window height (viewPortHeight + 2*top )
-	static bool winMinimized;		// window is in minimized state
-
-	GLFWwindow *window;
-	GLFWwindow *initGL();
-
-	GLFWcursor *cursor;
-
-	// static functions and callback functions
+	// private static functions/callbacks
 	static void setViewport();
-
 	static void mouseRawToNormalizedViewportCoordinates();
 	static void normalizedViewportToMouseRawCoordinates( double, double, double &, double & );
-
 	static void normalizedViewportToPhysCoordinates();
 	static void physToNormalizedViewportCoordinates( double, double, double, double &, double & );
-
 	static void mouseRawToPhysCoordinates();
 	static bool mouseInViewportInteriour();
-
 	static void framebufferSizeCallback( GLFWwindow *, int, int );
 	static void mouseButtonCallback( GLFWwindow *, int, int, int );
 	static void cursorPositionCallback( GLFWwindow *, double, double );
 	static void scrollCallback( GLFWwindow *, double, double );
 	static void APIENTRY glDebugOutput( GLenum, GLenum, unsigned int, GLenum, GLsizei,
 		const char *, const void * );
+
+public:
+	Viewer( string );
+	~Viewer();
+
+	void render();
+
+protected:
+	static ofstream logger;
 };
