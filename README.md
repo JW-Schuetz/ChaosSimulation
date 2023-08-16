@@ -15,12 +15,12 @@ Some display modes of the ODE-solution are available:
 * D: mouse driven rotating around both x- and y-axis
 
 ## Usage:
-* mouse button 1: (only display mode A) select an initial value in (x,y)-plane with z=0 and restart simulation
+* mouse button 1: (only display mode A) select at cursor position an initial value in (x,y)-plane with z=0 and restart simulation
 * mouse button 2: successive selecting display modes A to D
 * mouse wheel: select zoom-value (range 0.1 to 5.0)
 
 * keybord key FORWARD: change rotation direction to forward
-* keybord key BACKWARD: change rotation direction to backward![LorenzAttractor]
+* keybord key BACKWARD: change rotation direction to backward
 * keyboard keys UP/DOWN: stop rotation
 * keyboard key ESC exit the program
 
