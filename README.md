@@ -22,9 +22,10 @@ Some display modes of the ODE-solution are available:
 * keybord key FORWARD: change rotation direction to forward
 * keybord key BACKWARD: change rotation direction to backward
 * keyboard keys UP/DOWN: stop rotation
-* keyboard key ESC exit the program
+* keyboard key ESC: exit the program
 
 ## Screenshot display mode D:
   
-![Simulation](https://github.com/JW-Schuetz/ChaosSimulation/assets/40438317/cea51866-98b3-40d1-9ac5-eeeef2d1f4a9)
-  
+  ![Lorenz](https://github.com/JW-Schuetz/ChaosSimulation/assets/40438317/8e444a15-defc-458c-b318-5211691f2d09)
+ 
+![Roessler](https://github.com/JW-Schuetz/ChaosSimulation/assets/40438317/5a6f4f40-8d63-4f10-b2a3-fc6e1b9c35f2)
