@@ -26,6 +26,6 @@ Some display modes of the ODE-solution are available:
 
 ## Screenshot display mode D:
   
-  ![Lorenz](https://github.com/JW-Schuetz/ChaosSimulation/assets/40438317/8e444a15-defc-458c-b318-5211691f2d09)
+![Lorenz](https://github.com/JW-Schuetz/ChaosSimulation/assets/40438317/8e444a15-defc-458c-b318-5211691f2d09)
  
 ![Roessler](https://github.com/JW-Schuetz/ChaosSimulation/assets/40438317/5a6f4f40-8d63-4f10-b2a3-fc6e1b9c35f2)

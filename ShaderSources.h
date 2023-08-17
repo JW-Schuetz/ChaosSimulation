@@ -95,7 +95,7 @@ string glyphsFragmentBody =
 "}\n";
 
 
-string cuboidVertexBody =
+string cubeVertexBody =
 "layout (location = 0) in vec3 aPos;\n"
 "\n"
 "uniform mat4 projection;\n"
@@ -108,11 +108,11 @@ string cuboidVertexBody =
 "}\n";
 
 
-string cuboidFragmentBody =
+string cubeFragmentBody =
 "out vec4 color;\n"
-"uniform vec3 cuboidColor;\n"
+"uniform vec3 cubeColor;\n"
 "\n"
 "void main()\n"
 "{\n"
-"	color = vec4( cuboidColor, 1.0 );\n"
+"	color = vec4( cubeColor, 1.0 );\n"
 "}\n";

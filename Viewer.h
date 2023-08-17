@@ -64,10 +64,10 @@ typedef enum
 } ATTRIB;
 
 
-static const int	traceLength		       = 20000;		// trace length [points]
-static const double scrollIncrement	       = 0.05f;		// scale increment of mouse scroll wheel
-static const double minScale		       = 0.1f;		// min. allowed scale factor
-static const double maxScale		       = 5.0f;		// max. allowed scale factor
+static const int	traceLength		= 20000;		// trace length [points]
+static const double scrollIncrement	= 0.05f;		// scale increment of mouse scroll wheel
+static const double minScale		= 0.1f;		// min. allowed scale factor
+static const double maxScale		= 5.0f;		// max. allowed scale factor
 
 
 class Viewer
@@ -106,23 +106,23 @@ class Viewer
 	GLColor tracePointStartColor;		// initial trace point color
 	GLColor tracePointEndColor;			// end trace point color
 	GLColor glyphsColor;				// glyphs color
-	GLColor cuboidColor;				// cuboid color
+	GLColor cubeColor;					// cube color
 
 	unsigned int VBOAxes, VBOPoint;
 	unsigned int VBOPointTrace, VBOGlyphs;
 	unsigned int VAOAxes, VAOPoint;
 	unsigned int VAOPointTrace, VAOGlyphs;
-	unsigned int VBOCuboid;
-	unsigned int VBOCuboidElement;
-	unsigned int VAOCuboid;
+	unsigned int VBOCube;
+	unsigned int VBOCubeElement;
+	unsigned int VAOCube;
 
 	array<GLCoor3d,4> verticesAxes;
 	array<GLCoor3d,1> verticesPoint;
 	array<GLTraceVertex,traceLength> *verticesTrace;
-	array<GLCoor3d,8> verticesCuboid;
-	array<GLuint,24> indicesCuboid;
+	array<GLCoor3d,8> verticesCube;
+	array<GLuint,24> indicesCube;
 	map<char, Character> characters;
-	Shader *axes, *point, *pointTrace, *glyphs, *cuboid;
+	Shader *axes, *point, *pointTrace, *glyphs, *cube;
 
 	// private functions
 	GLFWwindow *initGL();

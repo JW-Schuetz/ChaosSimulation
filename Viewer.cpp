@@ -72,8 +72,8 @@ Viewer::Viewer( string logFile )
 	// Glyphs
 	glyphsColor = { 0.0f, 1.0f, 0.0f };		// glyphs color
 
-	// Cuboid
-	cuboidColor = { 1.0f, 1.0f, 1.0f };		// cuboid color
+	// Cube
+	cubeColor = { 1.0f, 1.0f, 1.0f };		// cube color
 
 	// Axes
 	VBOAxes		 = {};
@@ -94,8 +94,8 @@ Viewer::Viewer( string logFile )
 	VBOGlyphs = {};
 	VAOGlyphs = {};
 
-	// Cuboid
-	verticesCuboid = {};
+	// Cube
+	verticesCube = {};
 
 	// initialize windowing system
 	window = initGL();
@@ -125,10 +125,10 @@ Viewer::Viewer( string logFile )
 	glyphs->setFragmentBody( glyphsFragmentBody );
 	glyphs->createShaderProgram();
 
-	cuboid = new Shader( MAJOR_VERSION, MINOR_VERSION );
-	cuboid->setVertexBody( cuboidVertexBody );
-	cuboid->setFragmentBody( cuboidFragmentBody );
-	cuboid->createShaderProgram();
+	cube = new Shader( MAJOR_VERSION, MINOR_VERSION );
+	cube->setVertexBody( cubeVertexBody );
+	cube->setFragmentBody( cubeFragmentBody );
+	cube->createShaderProgram();
 
 	fillVertices();			// fill data in vertex array
 	prepareDrawing();		// do OpenGL stuff
@@ -275,17 +275,17 @@ void Viewer::fillVertices()
 	// Trace
 	verticesTrace->fill( { 0.0f, 0.0f, 0.0f } );
 
-	// Cuboid
-	verticesCuboid[0] = { -1.0f, -1.0f,  1.0f };
-	verticesCuboid[1] = {  1.0f, -1.0f,  1.0f };
-	verticesCuboid[2] = {  1.0f,  1.0f,  1.0f };
-	verticesCuboid[3] = { -1.0f,  1.0f,  1.0f };
-	verticesCuboid[4] = { -1.0f, -1.0f, -1.0f };
-	verticesCuboid[5] = {  1.0f, -1.0f, -1.0f };
-	verticesCuboid[6] = {  1.0f,  1.0f, -1.0f };
-	verticesCuboid[7] = { -1.0f,  1.0f, -1.0f };
+	// Cube
+	verticesCube[0] = { -1.0f, -1.0f,  1.0f };
+	verticesCube[1] = {  1.0f, -1.0f,  1.0f };
+	verticesCube[2] = {  1.0f,  1.0f,  1.0f };
+	verticesCube[3] = { -1.0f,  1.0f,  1.0f };
+	verticesCube[4] = { -1.0f, -1.0f, -1.0f };
+	verticesCube[5] = {  1.0f, -1.0f, -1.0f };
+	verticesCube[6] = {  1.0f,  1.0f, -1.0f };
+	verticesCube[7] = { -1.0f,  1.0f, -1.0f };
 
-	indicesCuboid = {
+	indicesCube = {
 		0, 1, 1, 2, 2, 3, 3, 0,		// front lines
 		4, 5, 5, 6, 6, 7, 7, 4,		// back lines
 		0, 4, 1, 5, 2, 6, 3, 7		// side lines
@@ -351,17 +351,17 @@ void Viewer::prepareDrawing()
 	glBindBuffer( GL_ARRAY_BUFFER, 0 );
 	glBindVertexArray( 0 );
 
-	// Cuboid
-	glGenVertexArrays( 1, &VAOCuboid );
-	glBindVertexArray( VAOCuboid );
+	// Cube
+	glGenVertexArrays( 1, &VAOCube );
+	glBindVertexArray( VAOCube );
 
-	glGenBuffers( 1, &VBOCuboid );
-	glBindBuffer( GL_ARRAY_BUFFER, VBOCuboid );
-	glBufferData( GL_ARRAY_BUFFER, sizeof( verticesCuboid ), verticesCuboid.data(), GL_DYNAMIC_DRAW);
+	glGenBuffers( 1, &VBOCube );
+	glBindBuffer( GL_ARRAY_BUFFER, VBOCube );
+	glBufferData( GL_ARRAY_BUFFER, sizeof( verticesCube ), verticesCube.data(), GL_DYNAMIC_DRAW);
 
-	glGenBuffers( 1, &VBOCuboidElement );
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, VBOCuboidElement );
-	glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( indicesCuboid ), indicesCuboid.data(), GL_DYNAMIC_DRAW );
+	glGenBuffers( 1, &VBOCubeElement );
+	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, VBOCubeElement );
+	glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( indicesCube ), indicesCube.data(), GL_DYNAMIC_DRAW );
 
 	glVertexAttribPointer( ATTRIB0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof( GLfloat ), (void *)0 );
 	glEnableVertexAttribArray( ATTRIB0 );
@@ -389,9 +389,9 @@ void Viewer::setStaticUniforms()
 	glyphs->setVec3( "glyphsColor", glyphsColor[0], glyphsColor[1], glyphsColor[2] );
 	glyphs->unUseShaderProgram();
 
-	cuboid->useShaderProgram();
-	cuboid->setVec3( "cuboidColor", cuboidColor[0], cuboidColor[1], cuboidColor[2] );
-	cuboid->unUseShaderProgram();
+	cube->useShaderProgram();
+	cube->setVec3( "cubeColor", cubeColor[0], cubeColor[1], cubeColor[2] );
+	cube->unUseShaderProgram();
 }
 
 void Viewer::render()
@@ -614,13 +614,13 @@ void Viewer::drawTracePoints( int index, Double3d &solution, glm::mat4 &projecti
 void Viewer::drawCube( glm::mat4 &projection, glm::mat4 &view, glm::mat4 &model )
 {
 	glLineWidth( 1 );
-	cuboid->useShaderProgram();
-	cuboid->setMat4( "projection", projection );
-	cuboid->setMat4( "view", view );
-	cuboid->setMat4( "model", model );
-	glBindVertexArray( VAOCuboid );
+	cube->useShaderProgram();
+	cube->setMat4( "projection", projection );
+	cube->setMat4( "view", view );
+	cube->setMat4( "model", model );
+	glBindVertexArray( VAOCube );
 	glDrawElements( GL_LINES, 24, GL_UNSIGNED_INT, 0 );
-	cuboid->unUseShaderProgram();
+	cube->unUseShaderProgram();
 }
 
 void Viewer::calcMatrices( float &time, glm::mat4 &projection, glm::mat4 &view, glm::mat4 &model )
@@ -691,10 +691,10 @@ Viewer::~Viewer()
 	glDeleteVertexArrays( 1, &VAOGlyphs );
 	delete glyphs;
 
-	// Cuboid
-	glDeleteBuffers( 1, &VBOCuboid );
-	glDeleteVertexArrays( 1, &VAOCuboid );
-	delete cuboid;
+	// Cube
+	glDeleteBuffers( 1, &VBOCube );
+	glDeleteVertexArrays( 1, &VAOCube );
+	delete cube;
 
 	delete camera;
 	delete calculator;
