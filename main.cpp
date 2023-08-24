@@ -33,6 +33,10 @@ void logMessage( string e )
 // linker options: Subsystem=windows, EntryPoint=mainCRTstartup
 int main( int argc, char** argv )
 {
+#ifdef WITH_MEM_LEAK_TESTING
+	//_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+	//_CrtSetBreakAlloc( 180 );
+#endif
 	if( argc < 2 )
 	{
 		// no logging file -> output to stderr
@@ -54,12 +58,18 @@ int main( int argc, char** argv )
 
 	try
 	{
+#ifdef WITH_MEM_LEAK_TESTING
+		_CrtMemState s1;
+		_CrtMemCheckpoint( &s1 );
+#endif
+
 		Viewer *v = new Viewer( argv[1] );
 		v->render();
 		delete v;
 
 #ifdef WITH_MEM_LEAK_TESTING
-		bool leak = _CrtDumpMemoryLeaks();
+		_CrtMemDumpAllObjectsSince( &s1 );
+		//bool leak = _CrtDumpMemoryLeaks();
 #endif
 
 		return 0;
