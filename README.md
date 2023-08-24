@@ -1,7 +1,7 @@
 # Simulation
 A little project for learning the concepts of graphic development
 using OpenGL for a simulation of chaotic ODE systems.  
-Yet implemented are two: Lorenz- and Roessler-System.
+Yet implemented ODE systems are two: Lorenz- and Roessler-System.
 
 The project uses the OpenGL support libraries GLFT/GLAD and depends
 on the boost C++ library for solving ODE systems.
