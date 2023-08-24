@@ -62,11 +62,9 @@ int main( int argc, char** argv )
 		_CrtMemState s1;
 		_CrtMemCheckpoint( &s1 );
 #endif
-
 		Viewer *v = new Viewer( argv[1] );
 		v->render();
 		delete v;
-
 #ifdef WITH_MEM_LEAK_TESTING
 		_CrtMemDumpAllObjectsSince( &s1 );
 		//bool leak = _CrtDumpMemoryLeaks();
