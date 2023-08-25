@@ -1,5 +1,5 @@
 # Simulation
-A little project for learning the concepts of graphic development
+A little VS project for learning the concepts of graphic development
 using OpenGL for a simulation of chaotic ODE systems.  
 Yet implemented ODE systems are two: Lorenz- and Roessler-System.
 
@@ -24,7 +24,7 @@ Some display modes of the ODE-solution are available:
 * keyboard keys UP/DOWN: stop rotation
 * keyboard key ESC: exit the program
 
-## Screenshot display mode D:
+## Screenshots (display mode D):
   
 ![Lorenz](https://github.com/JW-Schuetz/ChaosSimulation/assets/40438317/8e444a15-defc-458c-b318-5211691f2d09)
  
